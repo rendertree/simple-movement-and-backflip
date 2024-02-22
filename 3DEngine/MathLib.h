@@ -19,17 +19,17 @@
 
 #include "raymath.h"
 
-inline Vector3 operator+(const Vector3& a, const Vector3& b)
+inline Vector3 operator +(const Vector3& a, const Vector3& b)
 {
     return { a.x + b.x, a.y + b.y, a.z + b.z };
 }
 
-inline Vector3 operator-(const Vector3& a, const Vector3& b)
+inline Vector3 operator -(const Vector3& a, const Vector3& b)
 {
     return { a.x - b.x, a.y - b.y, a.z - b.z };
 }
 
-inline Vector3 operator*(const Vector3& a, const Vector3& b)
+inline Vector3 operator *(const Vector3& a, const Vector3& b)
 {
     return { a.x * b.x, a.y * b.y, a.z * b.z };
 }
@@ -61,10 +61,11 @@ inline Matrix operator *(const Matrix& a, const Matrix& b)
 
 inline Matrix MatrixTranslateV(const Vector3& v)
 {
-    return { 1.0f, 0.0f, 0.0f, v.x,
-             0.0f, 1.0f, 0.0f, v.y,
-             0.0f, 0.0f, 1.0f, v.z,
-             0.0f, 0.0f, 0.0f, 1.0f 
+    return { 
+        1.0f, 0.0f, 0.0f, v.x,
+        0.0f, 1.0f, 0.0f, v.y,
+        0.0f, 0.0f, 1.0f, v.z,
+        0.0f, 0.0f, 0.0f, 1.0f 
     };
 }
 

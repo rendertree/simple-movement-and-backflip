@@ -21,6 +21,8 @@
 #include "rlgl.h"
 #include "MathLib.h"
 
+#include <cassert>
+
 class Player
 {
 public:

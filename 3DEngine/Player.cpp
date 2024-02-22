@@ -19,19 +19,20 @@
 
 Player::Player()
 {
-    _model = LoadModel("resources/models/gltf/Male_Shirt.glb");
-    _modelAnimations = LoadModelAnimations("resources/models/gltf/Male_Shirt.glb", &_animsCount);
+    _model = LoadModel("resources/models/mixamo/model1.glb");
+    _modelAnimations = LoadModelAnimations("resources/models/mixamo/model1.glb", &_animsCount);
     
     if (_modelAnimations == nullptr)
     {
         TraceLog(LOG_ERROR, "Failed to load model animations");
     }
 
-    _position           = Vector3Zero();
-    _destination        = Vector3Zero();
-    _rotation           = QuaternionIdentity();
-    _transformMatrix    = MatrixIdentity();
-    _speed              = 2.0f;
+    _position        = Vector3Zero();
+    _destination     = Vector3Zero();
+    _rotation        = QuaternionIdentity();
+    _transformMatrix = MatrixIdentity();
+    _speed           = 2.0f;
+    _model.transform = MatrixTranslateV(_position) * QuaternionToMatrix(QuaternionFromEuler(90.0f, 0.0f, 0.0f)) * MatrixScale(1.0f, 1.0f, 1.0f);
 }
 
 Player::~Player()
@@ -42,7 +43,7 @@ Player::~Player()
 void Player::Update(const Camera& camera)
 {
     Vector3 direction = {};
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
     {
         Ray ray = GetMouseRay(GetMousePosition(), camera);
         Vector3 groundNormal = { 0.0f, 1.0f, 0.0f };
@@ -57,27 +58,30 @@ void Player::Update(const Camera& camera)
 
     _position = _position + Vector3Scale(direction, _speed * GetFrameTime());
 
-    if (_modelAnimations != nullptr)
-    {
-        ModelAnimation anim = _modelAnimations[_animIndex];
-        _animCurrentFrame = (_animCurrentFrame + 1) % anim.frameCount;
-        UpdateModelAnimation(_model, anim, _animCurrentFrame);
-    }
+    assert(_modelAnimations != nullptr);
+    ModelAnimation anim = _modelAnimations[_animIndex];
+    _animCurrentFrame = (_animCurrentFrame + 1) % anim.frameCount;
+    UpdateModelAnimation(_model, anim, _animCurrentFrame);
 
     if (Vector3Length(direction) != 0 && IsKeyDown(KEY_LEFT_SHIFT))
     {
-        _animIndex = 6;
+        _animIndex = 2;
         _speed = 7.0f;
     }
     else if (Vector3Length(direction) != 0)
     {
-        _animIndex = 11;
+        _animIndex = 3;
         _speed = 2.5f;
+    }
+    else if (IsKeyDown(KEY_SPACE))
+    {
+        _animIndex = 0;
     }
     else
     {
-        _animIndex = 2;
+        _animIndex = 1;
     }
+
 
     if (Vector3Length(direction) != 0)
     {
@@ -96,7 +100,7 @@ void Player::Draw() const
     rlPushMatrix();
     rlMultMatrixf(MatrixToFloat(_transformMatrix));
 
-    DrawModel(_model, Vector3Zero(), 0.4f, WHITE);
+    DrawModel(_model, Vector3Zero(), 0.02f, WHITE);
 
     // Pop the matrix back to the previous state
     rlPopMatrix();
