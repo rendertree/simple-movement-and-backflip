@@ -22,6 +22,13 @@
 #include "MathLib.h"
 
 #include <cassert>
+#include <string>
+#include <unordered_map>
+#include <functional>
+
+class Player;
+
+typedef std::function<void(Player&)> AnimStateFunction;
 
 class Player
 {
@@ -43,16 +50,26 @@ public:
 	void Draw() const;
 
 private:
+	void Idle(Player&);
+	void Walk(Player&);
+	void Run(Player&);
+	void Backflip(Player&);
+	void SetAnimState(const std::string& newState);
+
+private:
 	float _speed = 0.0f;
 	int _animsCount = 0;
 	unsigned int _animIndex = 0;
 	unsigned int _animCurrentFrame = 0;
-	ModelAnimation* _modelAnimations = nullptr;
 	Vector3 _destination = {};
 	Matrix _transformMatrix = {};
+	std::unordered_map<std::string, 
+	AnimStateFunction> _animStateActions = {};
+	ModelAnimation* _modelAnimations = nullptr;
+	float _backflipDuration = 0.0f;
+	std::string _animState = {};
 	Transform _transform = {};
 	Quaternion _rotation = {};
 	Vector3 _position = {};
 	Model _model = {};
 };
-

@@ -33,11 +33,62 @@ Player::Player()
     _transformMatrix = MatrixIdentity();
     _speed           = 2.0f;
     _model.transform = MatrixTranslateV(_position) * QuaternionToMatrix(QuaternionFromEuler(90.0f, 0.0f, 0.0f)) * MatrixScale(1.0f, 1.0f, 1.0f);
+
+    _animState = "Idle";
+
+    _animStateActions.insert({ "Idle",      [this](Player& anim)   { Idle(anim); } });
+    _animStateActions.insert({ "Walk",      [this](Player& anim)   { Walk(anim); } });
+    _animStateActions.insert({ "Run",       [this](Player& anim)   { Run(anim); } });
+    _animStateActions.insert({ "Backflip",  [this](Player& anim)   { Backflip(anim); } });
 }
 
 Player::~Player()
 {
     UnloadModel(_model);
+}
+
+void Player::Idle(Player&)
+{
+    _animIndex = 1;
+}
+
+void Player::Walk(Player&)
+{
+    _animIndex = 3;
+    _speed = 2.5f;
+}
+
+void Player::Run(Player&)
+{
+    _animIndex = 2;
+    _speed = 7.0f;
+}
+
+void Player::Backflip(Player&)
+{
+    _animIndex = 0;
+
+    if (_backflipDuration > 0)
+    {
+        _backflipDuration -= GetFrameTime();
+    }
+}
+
+void Player::SetAnimState(const std::string& newState)
+{
+    auto it = _animStateActions.find(newState);
+    if (it != _animStateActions.end())
+    {
+        if (_animState != newState)
+        {
+            _animCurrentFrame = 0;
+        }
+        _animState = newState;
+    }
+    else
+    {
+        TRACELOG(LOG_ERROR, "Invalid state");
+    }
 }
 
 void Player::Update(const Camera& camera)
@@ -53,7 +104,7 @@ void Player::Update(const Camera& camera)
         _destination = ray.position + Vector3Scale(ray.direction, hitDist);
     }
 
-    if (Vector3Distance(_destination, _position) > 0.1f) direction = Vector3Normalize(_destination - _position);
+    if (Vector3Distance(_destination, _position) > 0.1f && _backflipDuration < 0.1f) direction = Vector3Normalize(_destination - _position);
     else direction = Vector3Zero();
 
     _position = _position + Vector3Scale(direction, _speed * GetFrameTime());
@@ -63,25 +114,24 @@ void Player::Update(const Camera& camera)
     _animCurrentFrame = (_animCurrentFrame + 1) % anim.frameCount;
     UpdateModelAnimation(_model, anim, _animCurrentFrame);
 
-    if (Vector3Length(direction) != 0 && IsKeyDown(KEY_LEFT_SHIFT))
+    const bool onMove = (Vector3Length(direction) != 0 && _backflipDuration < 0.1f) ? true : false;
+
+    if (onMove && IsKeyDown(KEY_LEFT_SHIFT))
     {
-        _animIndex = 2;
-        _speed = 7.0f;
+        SetAnimState("Run");
     }
-    else if (Vector3Length(direction) != 0)
+    else if (onMove)
     {
-        _animIndex = 3;
-        _speed = 2.5f;
+        SetAnimState("Walk");
     }
-    else if (IsKeyDown(KEY_SPACE))
+    else if (_backflipDuration > 0)
     {
-        _animIndex = 0;
+        SetAnimState("Backflip");
     }
     else
     {
-        _animIndex = 1;
+        SetAnimState("Idle");
     }
-
 
     if (Vector3Length(direction) != 0)
     {
@@ -92,6 +142,17 @@ void Player::Update(const Camera& camera)
     _transform.rotation    = QuaternionNormalize(_rotation);
     _transform.scale       = Vector3{ 1.0f, 1.0f, 1.0f };
     _transformMatrix       = GetTransformMatrix(_transform);
+
+    auto action = _animStateActions.find(_animState);
+    if (action != _animStateActions.end())
+    {
+        action->second(*this);
+    }
+
+    if (IsKeyPressed(KEY_SPACE) && Vector3Length(direction) == 0)
+    {
+        _backflipDuration = 2.0f;
+    }
 }
 
 void Player::Draw() const
