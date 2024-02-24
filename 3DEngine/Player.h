@@ -58,6 +58,7 @@ private:
 
 private:
 	float _speed = 0.0f;
+	float _scale = 1.0f;
 	int _animsCount = 0;
 	unsigned int _animIndex = 0;
 	unsigned int _animCurrentFrame = 0;
