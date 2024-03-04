@@ -69,7 +69,7 @@ inline Matrix MatrixTranslateV(const Vector3& v)
     };
 }
 
-inline Matrix GetTransformMatrix(const Transform& transform)
+inline Matrix TransformToMatrix(const Transform& transform)
 {
     return MatrixTranslateV(transform.translation) 
         * QuaternionToMatrix(QuaternionNormalize(transform.rotation)) 

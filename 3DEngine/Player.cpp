@@ -31,7 +31,6 @@ Player::Player()
     _destination     = Vector3Zero();
     _rotation        = QuaternionIdentity();
     _transformMatrix = MatrixIdentity();
-    _speed           = 2.0f;
     _model.transform = MatrixTranslateV(_position) * QuaternionToMatrix(QuaternionFromEuler(90.0f, 0.0f, 0.0f)) * MatrixScale(_scale, _scale, _scale);
 
     _animState = "Idle";
@@ -139,9 +138,9 @@ void Player::Update(const Camera& camera)
     }
 
     _transform.translation = Vector3{ _position.x, _position.y + 1.0f, _position.z };
-    _transform.rotation    = QuaternionNormalize(_rotation);
+    _transform.rotation    = _rotation;
     _transform.scale       = Vector3{ _scale, _scale, _scale };
-    _transformMatrix       = GetTransformMatrix(_transform);
+    _transformMatrix       = TransformToMatrix(_transform);
 
     auto action = _animStateActions.find(_animState);
     if (action != _animStateActions.end())
