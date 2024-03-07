@@ -36,15 +36,8 @@ public:
 	Player();
 	~Player();
 	
-	inline Vector3 GetPosition() const 
-	{ 
-		return _position; 
-	}
-
-	inline Vector3 GetDestination() const
-	{
-		return _destination;
-	}
+	inline Vector3 GetPosition() const { return _position; }
+	inline Vector3 GetDestination() const { return _destination; }
 
 	void Update(const Camera& camera);
 	void Draw() const;
@@ -58,19 +51,18 @@ private:
 
 private:
 	float _speed = 0.0f;
-	float _scale = 1.0f;
 	int _animsCount = 0;
 	unsigned int _animIndex = 0;
 	unsigned int _animCurrentFrame = 0;
-	Vector3 _destination = {};
-	Matrix _transformMatrix = {};
 	std::unordered_map<std::string, 
-	AnimStateFunction> _animStateActions = {};
+	AnimStateFunction> _animStateActions{};
 	ModelAnimation* _modelAnimations = nullptr;
 	float _backflipDuration = 0.0f;
-	std::string _animState = {};
-	Transform _transform = {};
-	Quaternion _rotation = {};
-	Vector3 _position = {};
-	Model _model = {};
+	std::string _animState{};
+	Transform3D _transform{};
+	Quaternion _rotation{};
+	Vector3 _destination{};
+	Vector3 _position{};
+	Vector3 _scale{};
+	Model _model{};
 };

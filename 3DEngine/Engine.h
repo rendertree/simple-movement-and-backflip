@@ -19,11 +19,3 @@
 
 #include "Player.h"
 #include "RLCamera.h"
-
-#include <iostream>
-#include <cassert>
-
-class Engine
-{
-};
-

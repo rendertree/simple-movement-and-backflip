@@ -19,6 +19,14 @@
 
 #include "raymath.h"
 
+struct Transform3D
+{
+    Vector3 position{ 0.0f, 0.0f, 0.0f };
+    Quaternion rotation{ 0.0f, 0.0f, 0.0f, 1.0f };
+    Vector3 scale{ 1.0f, 1.0f, 1.0f };
+    Matrix ToMatrix() const;
+};
+
 inline Vector3 operator +(const Vector3& a, const Vector3& b)
 {
     return { a.x + b.x, a.y + b.y, a.z + b.z };
@@ -69,9 +77,17 @@ inline Matrix MatrixTranslateV(const Vector3& v)
     };
 }
 
-inline Matrix TransformToMatrix(const Transform& transform)
+inline Matrix MatrixScaleV(const Vector3& v)
 {
-    return MatrixTranslateV(transform.translation) 
-        * QuaternionToMatrix(QuaternionNormalize(transform.rotation)) 
-        * MatrixScale(transform.scale.x, transform.scale.y, transform.scale.z);
+    return {
+        v.x, 0.0f, 0.0f, 0.0f,
+        0.0f, v.y, 0.0f, 0.0f,
+        0.0f, 0.0f, v.z, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f 
+    };
+}
+
+inline Matrix Transform3D::ToMatrix() const
+{
+    return MatrixTranslateV(position) * QuaternionToMatrix(rotation) * MatrixScaleV(scale);
 }

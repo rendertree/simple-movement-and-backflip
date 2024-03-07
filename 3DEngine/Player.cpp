@@ -27,11 +27,12 @@ Player::Player()
         TraceLog(LOG_ERROR, "Failed to load model animations");
     }
 
-    _position        = Vector3Zero();
-    _destination     = Vector3Zero();
-    _rotation        = QuaternionIdentity();
-    _transformMatrix = MatrixIdentity();
-    _model.transform = MatrixTranslateV(_position) * QuaternionToMatrix(QuaternionFromEuler(90.0f, 0.0f, 0.0f)) * MatrixScale(_scale, _scale, _scale);
+    _position    = Vector3Zero();
+    _destination = Vector3Zero();
+    _rotation    = QuaternionIdentity();
+    _scale       = Vector3{ 1.0f, 1.0f, 1.0f };
+
+    _model.transform = MatrixTranslateV(_position) * QuaternionToMatrix(QuaternionFromEuler(90.0f, 0.0f, 0.0f)) * MatrixScaleV(_scale);
 
     _animState = "Idle";
 
@@ -92,11 +93,11 @@ void Player::SetAnimState(const std::string& newState)
 
 void Player::Update(const Camera& camera)
 {
-    Vector3 direction = {};
+    Vector3 direction{};
     if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
     {
         Ray ray = GetMouseRay(GetMousePosition(), camera);
-        Vector3 groundNormal = { 0.0f, 1.0f, 0.0f };
+        Vector3 groundNormal{ 0.0f, 1.0f, 0.0f };
 
         float hitDist = -((Vector3DotProduct(ray.position, groundNormal) + 0) / Vector3DotProduct(ray.direction, groundNormal));
 
@@ -134,13 +135,23 @@ void Player::Update(const Camera& camera)
 
     if (onMove)
     {
-        _rotation = QuaternionFromVector3ToVector3(Vector3{ 0.0f, 0.0f, 1.0f }, Vector3Normalize(direction));
+        const Vector3 vecUp{ 0.0f, 0.0f, 1.0f };
+        const Vector3 vecDir{ Vector3Normalize(direction) };
+
+        float cos2Theta = vecUp.x * vecDir.x + vecUp.y * vecDir.y + vecUp.z * vecDir.z;
+        Vector3 cross{ vecUp.y * vecDir.z - vecUp.z * vecDir.y, vecUp.z * vecDir.x - vecUp.x * vecDir.z, vecUp.x * vecDir.y - vecUp.y * vecDir.x };
+
+        _rotation.x = cross.x;
+        _rotation.y = cross.y;
+        _rotation.z = cross.z;
+        _rotation.w = 1.0f + cos2Theta;
+
+        _rotation = QuaternionNormalize(_rotation);
     }
 
-    _transform.translation = Vector3{ _position.x, _position.y + 1.0f, _position.z };
-    _transform.rotation    = _rotation;
-    _transform.scale       = Vector3{ _scale, _scale, _scale };
-    _transformMatrix       = TransformToMatrix(_transform);
+    _transform.position = Vector3{ _position.x, _position.y + 1.0f, _position.z };
+    _transform.rotation = _rotation;
+    _transform.scale    = _scale;
 
     auto action = _animStateActions.find(_animState);
     if (action != _animStateActions.end())
@@ -156,12 +167,8 @@ void Player::Update(const Camera& camera)
 
 void Player::Draw() const
 {
-    // Push the current matrix and multiply it with the transformation matrix
     rlPushMatrix();
-    rlMultMatrixf(MatrixToFloat(_transformMatrix));
-
+    rlMultMatrixf(MatrixToFloat(_transform.ToMatrix()));
     DrawModel(_model, Vector3Zero(), 0.02f, WHITE);
-
-    // Pop the matrix back to the previous state
     rlPopMatrix();
 }
