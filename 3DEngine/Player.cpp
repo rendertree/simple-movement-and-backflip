@@ -93,7 +93,7 @@ void Player::SetAnimState(const std::string& newState)
 
 void Player::Update(const Camera& camera)
 {
-    Vector3 direction{};
+    Vector3 dir{};
     if (IsMouseButtonDown(MOUSE_LEFT_BUTTON))
     {
         Ray ray = GetMouseRay(GetMousePosition(), camera);
@@ -104,17 +104,17 @@ void Player::Update(const Camera& camera)
         _destination = ray.position + Vector3Scale(ray.direction, hitDist);
     }
 
-    if (Vector3Distance(_destination, _position) > 0.1f && _backflipDuration < 0.1f) direction = Vector3Normalize(_destination - _position);
-    else direction = Vector3Zero();
+    if (Vector3Distance(_destination, _position) > 0.1f && _backflipDuration < 0.1f) dir = Vector3Normalize(_destination - _position);
+    else dir = Vector3Zero();
 
-    _position = _position + Vector3Scale(direction, _speed * GetFrameTime());
+    _position = _position + Vector3Scale(dir, _speed * GetFrameTime());
 
     assert(_modelAnimations != nullptr);
     ModelAnimation anim = _modelAnimations[_animIndex];
     _animCurrentFrame = (_animCurrentFrame + 1) % anim.frameCount;
     UpdateModelAnimation(_model, anim, _animCurrentFrame);
 
-    const bool onMove = (Vector3Length(direction) != 0 && _backflipDuration < 0.1f) ? true : false;
+    const bool onMove = (Vector3Length(dir) != 0 && _backflipDuration < 0.1f) ? true : false;
 
     if (onMove && IsKeyDown(KEY_LEFT_SHIFT))
     {
@@ -136,10 +136,8 @@ void Player::Update(const Camera& camera)
     if (onMove)
     {
         const Vector3 vecUp{ 0.0f, 0.0f, 1.0f };
-        const Vector3 vecDir{ Vector3Normalize(direction) };
-
-        float cos2Theta = vecUp.x * vecDir.x + vecUp.y * vecDir.y + vecUp.z * vecDir.z;
-        Vector3 cross{ vecUp.y * vecDir.z - vecUp.z * vecDir.y, vecUp.z * vecDir.x - vecUp.x * vecDir.z, vecUp.x * vecDir.y - vecUp.y * vecDir.x };
+        float cos2Theta = vecUp.x * dir.x + vecUp.y * dir.y + vecUp.z * dir.z;
+        Vector3 cross{ vecUp.y * dir.z - vecUp.z * dir.y, vecUp.z * dir.x - vecUp.x * dir.z, vecUp.x * dir.y - vecUp.y * dir.x };
 
         _rotation.x = cross.x;
         _rotation.y = cross.y;
