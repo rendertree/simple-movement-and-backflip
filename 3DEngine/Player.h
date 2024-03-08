@@ -49,20 +49,22 @@ private:
 	void Backflip(Player&);
 	void SetAnimState(const std::string& newState);
 
-private:
-	float _speed = 0.0f;
+	Vector3 _scale{};
+	Vector3 _position{};
+	Vector3 _destination{};
+	Quaternion _rotation{};
+	Transform3D _transform{};
+
+	float _movementSpeed = 0.0f;
+	float _backflipDuration = 0.0f;
+
 	int _animsCount = 0;
 	unsigned int _animIndex = 0;
 	unsigned int _animCurrentFrame = 0;
+	
+	Model _model{};
+	std::string _animState{};
 	std::unordered_map<std::string, 
 	AnimStateFunction> _animStateActions{};
 	ModelAnimation* _modelAnimations = nullptr;
-	float _backflipDuration = 0.0f;
-	std::string _animState{};
-	Transform3D _transform{};
-	Quaternion _rotation{};
-	Vector3 _destination{};
-	Vector3 _position{};
-	Vector3 _scale{};
-	Model _model{};
 };

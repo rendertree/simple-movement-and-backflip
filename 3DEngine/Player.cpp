@@ -45,6 +45,11 @@ Player::Player()
 Player::~Player()
 {
     UnloadModel(_model);
+
+    if (_modelAnimations != nullptr)
+    {
+        UnloadModelAnimation(*_modelAnimations);
+    }
 }
 
 void Player::Idle(Player&)
@@ -55,13 +60,13 @@ void Player::Idle(Player&)
 void Player::Walk(Player&)
 {
     _animIndex = 3;
-    _speed = 2.5f;
+    _movementSpeed = 2.5f;
 }
 
 void Player::Run(Player&)
 {
     _animIndex = 2;
-    _speed = 7.0f;
+    _movementSpeed = 7.0f;
 }
 
 void Player::Backflip(Player&)
@@ -107,12 +112,7 @@ void Player::Update(const Camera& camera)
     if (Vector3Distance(_destination, _position) > 0.1f && _backflipDuration < 0.1f) dir = Vector3Normalize(_destination - _position);
     else dir = Vector3Zero();
 
-    _position = _position + Vector3Scale(dir, _speed * GetFrameTime());
-
-    assert(_modelAnimations != nullptr);
-    ModelAnimation anim = _modelAnimations[_animIndex];
-    _animCurrentFrame = (_animCurrentFrame + 1) % anim.frameCount;
-    UpdateModelAnimation(_model, anim, _animCurrentFrame);
+    _position = _position + Vector3Scale(dir, _movementSpeed * GetFrameTime());
 
     const bool onMove = (Vector3Length(dir) != 0 && _backflipDuration < 0.1f) ? true : false;
 
@@ -161,6 +161,15 @@ void Player::Update(const Camera& camera)
     {
         _backflipDuration = 1.7f;
     }
+
+#ifdef _DEBUG
+    assert(_modelAnimations != nullptr);
+#else
+    if (_modelAnimations == nullptr) return;
+#endif
+    ModelAnimation& anim = _modelAnimations[_animIndex];
+    _animCurrentFrame = (_animCurrentFrame + 1) % anim.frameCount;
+    UpdateModelAnimation(_model, anim, _animCurrentFrame);
 }
 
 void Player::Draw() const
