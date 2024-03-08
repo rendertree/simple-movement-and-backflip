@@ -26,8 +26,8 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "3D Engine");
     SetTargetFPS(60);
 
-    RLCamera camera = {};
-    Player player = {};
+    RLCamera camera{};
+    Player player{};
 
     Shader groundPlaneShader = LoadShader("./resources/checkerboard.vs", "./resources/checkerboard.fs");
     Mesh groundPlaneMesh = GenMeshPlane(40.0f, 40.0f, 10, 10);
