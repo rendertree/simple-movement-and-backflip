@@ -167,7 +167,7 @@ void Player::Update(const Camera& camera)
 #else
     if (_modelAnimations == nullptr) return;
 #endif
-    ModelAnimation& anim = _modelAnimations[_animIndex];
+    const ModelAnimation& anim = _modelAnimations[_animIndex];
     _animCurrentFrame = (_animCurrentFrame + 1) % anim.frameCount;
     UpdateModelAnimation(_model, anim, _animCurrentFrame);
 }
